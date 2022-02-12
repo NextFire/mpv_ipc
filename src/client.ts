@@ -21,8 +21,8 @@ interface PromiseController {
 
 export class MpvIPC {
   #socket: Deno.Conn | Deno.File;
-  #cmdsCallbacks = new Map<number, PromiseController>();
   #eventsIterators = new Set<ReadableStreamDefaultController<MpvEvent>>();
+  #cmdsCallbacks = new Map<number, PromiseController>();
   #lastId = 0;
   #encoder = new TextEncoder();
 
@@ -44,20 +44,23 @@ export class MpvIPC {
   async #startEventLoop() {
     for await (const line of readLines(this.#socket)) {
       const payload = JSON.parse(line);
-      if ("error" in payload) {
-        const handle = this.#cmdsCallbacks.get(payload.request_id);
-        if (handle) {
-          (payload.error === "success" ? handle.resolve : handle.reject)(
-            payload
-          );
-          this.#cmdsCallbacks.delete(payload.request_id);
-        }
-      } else {
+      if ("event" in payload) {
         for (const ctrlr of this.#eventsIterators) {
           ctrlr.enqueue(payload);
         }
+      } else {
+        const handle = this.#cmdsCallbacks.get(payload.request_id);
+        if (handle) {
+          if (payload.error === "success") {
+            handle.resolve(payload);
+          } else {
+            handle.reject(new Error(payload));
+          }
+          this.#cmdsCallbacks.delete(payload.request_id);
+        }
       }
     }
+    throw new Error("mpv socket closed");
   }
 
   #getId() {
