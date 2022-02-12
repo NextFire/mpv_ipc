@@ -39,7 +39,6 @@ export class MpvIPC {
   async #startReadLoop() {
     for await (const line of readLines(this.#socket)) {
       const payload = JSON.parse(line);
-      console.log(payload);
       if ("error" in payload) {
         const handle = this.#cmdsCallbacks.get(payload.request_id);
         if (handle) {
