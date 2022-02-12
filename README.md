@@ -4,13 +4,15 @@
 
 ## Usage
 
-Import the module, you will need to run your scripts with the `--unstable --allow-read --allow-write` flags.
+The module can be imported from https://deno.land/x/mpv_ipc/mod.ts
+
+You will need to run your scripts with the `--unstable --allow-read --allow-write` flags.
 
 ## Example
 
 ```typescript
-// replace <hash> with the latest version hash
-import { MpvIPC } from "https://raw.githubusercontent.com/NextFire/mpv_ipc/<hash>/mod.ts";
+// replace 0.1.0 with the latest tag available
+import { MpvIPC } from "https://deno.land/x/mpv_ipc@0.1.0/mod.ts";
 
 // connect to socket
 // mpv file.mkv --input-ipc-server=/tmp/mpvsocket
