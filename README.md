@@ -2,6 +2,10 @@
 
 [mpv-player/mpv](https://github.com/mpv-player/mpv) [JSON IPC](https://mpv.io/manual/stable/#json-ipc) wrapper for [Deno](https://deno.land).
 
+## Usage
+
+Import the module, you will need to run your scripts with the `--unstable --allow-read --allow-write` flags.
+
 ## Example
 
 ```typescript
@@ -10,7 +14,7 @@ import { MpvIPC } from "https://raw.githubusercontent.com/NextFire/mpv_ipc/<hash
 
 // connect to socket
 // mpv file.mkv --input-ipc-server=/tmp/mpvsocket
-const client = await MpvIPC.connect("/tmp/mpvsocket");
+const client = await MpvIPC.connectSocket("/tmp/mpvsocket");
 
 // send a command and await the response
 const resp1 = client.sendCommand("screenshot");

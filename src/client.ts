@@ -20,23 +20,28 @@ interface PromiseController {
 }
 
 export class MpvIPC {
-  #socket: Deno.File;
+  #socket: Deno.Conn | Deno.File;
   #cmdsCallbacks = new Map<number, PromiseController>();
   #eventsIterators = new Set<ReadableStreamDefaultController<MpvEvent>>();
   #lastId = 0;
   #encoder = new TextEncoder();
 
-  constructor(socket: Deno.File) {
+  constructor(socket: Deno.Conn | Deno.File) {
     this.#socket = socket;
-    this.#startReadLoop();
+    this.#startEventLoop();
   }
 
-  static async connect(path: string) {
-    const socket = await Deno.open(path);
+  static async connectSocket(path: string) {
+    const socket = await Deno.connect({ path, transport: "unix" });
     return new this(socket);
   }
 
-  async #startReadLoop() {
+  static async connectFd(id: number | string) {
+    const socket = await Deno.open(`/dev/fd/${id}`);
+    return new this(socket);
+  }
+
+  async #startEventLoop() {
     for await (const line of readLines(this.#socket)) {
       const payload = JSON.parse(line);
       if ("error" in payload) {
